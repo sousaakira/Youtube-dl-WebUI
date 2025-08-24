@@ -1,0 +1,43 @@
+{
+  "name": "youtube-dl-webui",
+  "version": "1.0.0",
+  "description": "Youtube-dl WebUI converted to Node.js",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "youtube-dl",
+    "yt-dlp",
+    "download",
+    "video",
+    "webui"
+  ],
+  "author": "Converted from PHP version",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "connect-flash": "^0.1.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "fs-extra": "^11.1.1",
+    "helmet": "^7.1.0",
+    "method-override": "^3.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "youtube-dl-exec": "^2.5.6"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

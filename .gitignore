@@ -1,0 +1,6 @@
+.DS_Store
+downloads
+logs
+config/config.php
+node_modules
+.env

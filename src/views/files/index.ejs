@@ -1,0 +1,230 @@
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-folder"></i> Lista de Arquivos
+        </h1>
+    </div>
+</div>
+
+<!-- Arquivos Completos -->
+<% if (files && files.length > 0) { %>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Arquivos Disponíveis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tamanho</th>
+                                    <th>Modificado</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% files.forEach(function(file) { %>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-file-earmark me-2"></i>
+                                                <div>
+                                                    <a href="/files/download/<%= encodeURIComponent(file.name) %>" 
+                                                       class="text-decoration-none" 
+                                                       title="Baixar arquivo">
+                                                        <%= file.name %>
+                                                    </a>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-clock"></i>
+                                                        <%= file.modified.toLocaleString('pt-BR') %>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary"><%= file.size %></span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <%= file.modified.toLocaleDateString('pt-BR') %>
+                                            </small>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group" role="group">
+                                                <a href="/files/download/<%= encodeURIComponent(file.name) %>" 
+                                                   class="btn btn-primary btn-sm" 
+                                                   title="Baixar">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                                <a href="/files/stream/<%= encodeURIComponent(file.name) %>" 
+                                                   class="btn btn-info btn-sm" 
+                                                   title="Reproduzir"
+                                                   target="_blank">
+                                                    <i class="bi bi-play-circle"></i>
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-danger btn-sm" 
+                                                        title="Deletar"
+                                                        onclick="deleteFile('<%= file.name %>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } else { %>
+    <div class="row mb-4">
+        <div class="col-12">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Nenhum arquivo encontrado!</strong>
+                                <br>
+                                <small>Faça alguns downloads primeiro para ver os arquivos aqui.</small>
+                            </div>
+                        </div>
+                    </div>
+<% } %>
+
+<!-- Arquivos Parciais -->
+<% if (parts && parts.length > 0) { %>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-hourglass-split"></i> Arquivos Parciais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tamanho</th>
+                                    <th>Modificado</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% parts.forEach(function(file) { %>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-file-earmark-x me-2 text-warning"></i>
+                                                <div>
+                                                    <span class="text-muted"><%= file.name %></span>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-clock"></i>
+                                                        <%= file.modified.toLocaleString('pt-BR') %>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning"><%= file.size %></span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <%= file.modified.toLocaleDateString('pt-BR') %>
+                                            </small>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" 
+                                                    class="btn btn-danger btn-sm" 
+                                                    title="Deletar arquivo parcial"
+                                                    onclick="deleteFile('<%= file.name %>')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja deletar o arquivo <strong id="deleteFileName"></strong>?</p>
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle"></i>
+                    Esta ação não pode ser desfeita.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Deletar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Função para deletar arquivo
+function deleteFile(filename) {
+    document.getElementById('deleteFileName').textContent = filename;
+    document.getElementById('deleteForm').action = `/files/${encodeURIComponent(filename)}`;
+    
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+
+// Função para baixar arquivo
+function downloadFile(filename) {
+    window.location.href = `/files/download/${encodeURIComponent(filename)}`;
+}
+
+// Função para reproduzir arquivo
+function playFile(filename) {
+    window.open(`/files/stream/${encodeURIComponent(filename)}`, '_blank');
+}
+
+// Atualizar lista de arquivos a cada 30 segundos
+setInterval(function() {
+    // Recarregar a página para mostrar novos arquivos
+    // Em uma implementação mais avançada, você poderia usar AJAX
+}, 30000);
+
+// Adicionar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>

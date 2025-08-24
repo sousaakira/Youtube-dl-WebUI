@@ -1,0 +1,26 @@
+<div class="error-page">
+    <div class="error-code">
+        <% if (error && error.status) { %>
+            <%= error.status %>
+        <% } else { %>
+            500
+        <% } %>
+    </div>
+    
+    <h1 class="error-message">
+        <%= message %>
+    </h1>
+    
+    <% if (error && error.stack && process.env.NODE_ENV === 'development') { %>
+        <div class="error-details">
+            <h3>Detalhes do Erro:</h3>
+            <pre class="error-stack"><%= error.stack %></pre>
+        </div>
+    <% } %>
+    
+    <div class="mt-4">
+        <a href="/download" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Voltar ao Início
+        </a>
+    </div>
+</div>

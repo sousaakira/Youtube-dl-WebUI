@@ -1,0 +1,572 @@
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-download"></i> Download
+        </h1>
+    </div>
+</div>
+
+<!-- Formulário de Download -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-link-45deg"></i> Novo Download
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="download-form" action="/download" method="post">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="urls" class="form-label">URLs:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-link-45deg"></i>
+                                </span>
+                                <input 
+                                    class="form-control" 
+                                    id="urls" 
+                                    name="urls" 
+                                    placeholder="Link(s) separados por espaço ou vírgula" 
+                                    type="text" 
+                                    required
+                                >
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Você pode inserir múltiplas URLs separadas por espaço ou vírgula
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="downloadPath" class="form-label">Pasta de Destino:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-folder"></i>
+                                </span>
+                                <input 
+                                    class="form-control" 
+                                    id="downloadPath" 
+                                    name="downloadPath" 
+                                    placeholder="Pasta onde salvar os downloads" 
+                                    type="text"
+                                    readonly
+                                    value="<%= downloadsFolder %>"
+                                >
+                                <button type="button" class="btn btn-outline-secondary" onclick="openPathSelector()">
+                                    <i class="bi bi-folder2-open"></i> Selecionar
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Clique em "Selecionar" para escolher uma pasta diferente
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="outfilename" class="form-label">Template de Nome:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-file-earmark"></i>
+                                </span>
+                                <input 
+                                    class="form-control" 
+                                    id="outfilename" 
+                                    name="outfilename" 
+                                    placeholder="Template de nome de arquivo" 
+                                    type="text"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row align-items-center">
+                        <div class="col-auto mb-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-download"></i> Download
+                            </button>
+                        </div>
+                        
+                        <div class="col-auto mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="audioCheck" name="audio">
+                                <label class="form-check-label" for="audioCheck">
+                                    <i class="bi bi-music-note"></i> Apenas Áudio
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-auto mb-2">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-film"></i>
+                                </span>
+                                <input 
+                                    class="form-control" 
+                                    id="vformat" 
+                                    name="vformat" 
+                                    placeholder="Código de formato" 
+                                    type="text"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<!-- Informações do Sistema -->
+<div class="row">
+    <div class="col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Informações do Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <p class="mb-2">
+                            <strong>Espaço livre:</strong><br>
+                            <span class="badge bg-success"><%= freeSpace %></span>
+                        </p>
+                        <p class="mb-2">
+                            <strong>Espaço usado:</strong><br>
+                            <span class="badge bg-info"><%= usedSpace %></span>
+                        </p>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-2">
+                            <strong>Pasta de downloads:</strong><br>
+                            <small class="text-muted"><%= downloadsFolder %></small>
+                        </p>
+                        <p class="mb-2">
+                            <strong>Versão yt-dlp:</strong><br>
+                            <span class="badge bg-secondary"><%= ytdlpVersion %></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-question-circle"></i> Ajuda
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Como funciona?</strong><br>
+                    <small class="text-muted">
+                        Simplesmente cole o link do vídeo no campo e clique em "Download"
+                    </small>
+                </p>
+                
+                <p class="mb-2">
+                    <strong>Quais sites são suportados?</strong><br>
+                    <small class="text-muted">
+                        <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank">
+                            Aqui está uma lista dos sites suportados
+                        </a>
+                    </small>
+                </p>
+                
+                <p class="mb-2">
+                    <strong>Como baixar no meu computador?</strong><br>
+                    <small class="text-muted">
+                        Vá para <a href="/files">Lista de arquivos</a> → escolha um → clique direito no link → "Salvar destino como..."
+                    </small>
+                </p>
+                
+                <p class="mb-0">
+                    <strong>O que são os campos Filename e Format?</strong><br>
+                    <small class="text-muted">
+                        Eles são opcionais. Veja a documentação oficial sobre 
+                        <a href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md#format-selection" target="_blank">Seleção de formato</a> ou 
+                        <a href="https://github.com/yt-dlp/yt-dlp/blob/master/README.md#output-template" target="_blank">Template de saída</a>
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Downloads Ativos -->
+<div class="row" id="activeDownloadsSection" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="bi bi-play-circle"></i> Downloads Ativos
+                </h6>
+                <button class="btn btn-danger btn-sm" onclick="stopAllDownloads()">
+                    <i class="bi bi-stop-circle"></i> Parar Todos
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="activeDownloadsList">
+                    <!-- Downloads ativos serão carregados aqui via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Seleção de Pasta -->
+<div class="modal fade" id="pathSelectorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-folder2-open"></i> Selecionar Pasta de Destino
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Discos Disponíveis</h6>
+                        <div class="list-group" id="disksList">
+                            <!-- Discos serão carregados aqui -->
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h6>Conteúdo da Pasta</h6>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb" id="pathBreadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="#" onclick="navigateToPath('/mnt')">
+                                        <i class="bi bi-hdd"></i> Discos
+                                    </a>
+                                </li>
+                            </ol>
+                        </nav>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pathItemsList">
+                                    <!-- Itens serão carregados aqui -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="me-auto">
+                    <strong>Pasta selecionada:</strong> <span id="selectedPathDisplay">Nenhuma</span>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmPathSelection()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Função para carregar downloads ativos
+function loadActiveDownloads() {
+    fetch('/download/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.activeCount > 0) {
+                document.getElementById('activeDownloadsSection').style.display = 'block';
+                
+                const downloadsList = document.getElementById('activeDownloadsList');
+                downloadsList.innerHTML = '';
+                
+                data.activeDownloads.forEach(download => {
+                    const downloadItem = document.createElement('div');
+                    downloadItem.className = 'alert alert-info d-flex justify-content-between align-items-center';
+                    downloadItem.innerHTML = `
+                        <div>
+                            <strong>Download ID:</strong> ${download.id}<br>
+                            <small>URLs: ${download.urls.join(', ')}<br>
+                            Iniciado: ${new Date(download.startTime).toLocaleString()}</small>
+                        </div>
+                        <button class="btn btn-warning btn-sm" onclick="stopDownload('${download.id}')">
+                            <i class="bi bi-stop"></i> Parar
+                        </button>
+                    `;
+                    downloadsList.appendChild(downloadItem);
+                });
+            } else {
+                document.getElementById('activeDownloadsSection').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar downloads ativos:', error);
+        });
+}
+
+// Função para parar download específico
+function stopDownload(downloadId) {
+    if (confirm('Tem certeza que deseja parar este download?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/download/stop/${downloadId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Função para parar todos os downloads
+function stopAllDownloads() {
+    if (confirm('Tem certeza que deseja parar todos os downloads?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/download/stop-all';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Carregar downloads ativos a cada 5 segundos
+setInterval(loadActiveDownloads, 5000);
+
+// Carregar na primeira vez
+document.addEventListener('DOMContentLoaded', function() {
+    loadActiveDownloads();
+});
+
+// Validação do formulário
+document.getElementById('download-form').addEventListener('submit', function(e) {
+    const urls = document.getElementById('urls').value.trim();
+    
+    if (!urls) {
+        e.preventDefault();
+        alert('Por favor, insira pelo menos uma URL.');
+        document.getElementById('urls').focus();
+        return false;
+    }
+    
+    // Validar formato das URLs
+    const urlArray = urls.split(/[\s,]+/);
+    for (const url of urlArray) {
+        if (url && !isValidUrl(url.trim())) {
+            e.preventDefault();
+            alert(`URL inválida: ${url.trim()}`);
+            document.getElementById('urls').focus();
+            return false;
+        }
+    }
+});
+
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+// Variáveis para o seletor de pastas
+let currentPathSelectorPath = '/mnt';
+let selectedDownloadPath = '';
+
+// Abrir modal de seleção de pasta
+function openPathSelector() {
+    selectedDownloadPath = document.getElementById('downloadPath').value;
+    currentPathSelectorPath = '/mnt';
+    loadDisksForSelector();
+    navigateToPathSelector('/mnt');
+    
+    const modal = new bootstrap.Modal(document.getElementById('pathSelectorModal'));
+    modal.show();
+}
+
+// Carregar discos para o seletor
+async function loadDisksForSelector() {
+    try {
+        const response = await fetch('/filesystem/disks');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayDisksForSelector(data.disks);
+        } else {
+            console.error('Erro ao carregar discos:', data.error);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar discos:', error);
+    }
+}
+
+// Exibir discos no seletor
+function displayDisksForSelector(disks) {
+    const disksList = document.getElementById('disksList');
+    disksList.innerHTML = '';
+    
+    disks.forEach(disk => {
+        const diskItem = document.createElement('a');
+        diskItem.href = '#';
+        diskItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+        diskItem.onclick = () => navigateToPathSelector(disk.path);
+        
+        const diskInfo = document.createElement('div');
+        diskInfo.className = 'flex-grow-1';
+        
+        const diskName = document.createElement('div');
+        diskName.className = 'fw-bold';
+        diskName.innerHTML = `<i class="bi bi-hdd"></i> ${disk.name}`;
+        
+        const diskPath = document.createElement('div');
+        diskPath.className = 'small text-muted';
+        diskPath.textContent = disk.path;
+        
+        diskInfo.appendChild(diskName);
+        diskInfo.appendChild(diskPath);
+        
+        const diskBadge = document.createElement('span');
+        diskBadge.className = `badge bg-${getDiskTypeColor(disk.type)} rounded-pill`;
+        diskBadge.textContent = disk.type;
+        
+        diskItem.appendChild(diskInfo);
+        diskItem.appendChild(diskBadge);
+        disksList.appendChild(diskItem);
+    });
+}
+
+// Navegar para um caminho no seletor
+async function navigateToPathSelector(path) {
+    try {
+        currentPathSelectorPath = path;
+        updatePathBreadcrumb(path);
+        
+        const response = await fetch(`/filesystem/navigate?path=${encodeURIComponent(path)}&showHidden=false`);
+        const data = await response.json();
+        
+        if (data.success) {
+            displayPathItems(data.navigation);
+        } else {
+            console.error('Erro ao navegar:', data.error);
+        }
+    } catch (error) {
+        console.error('Erro ao navegar:', error);
+    }
+}
+
+// Exibir itens do caminho no seletor
+function displayPathItems(navigation) {
+    const pathItemsList = document.getElementById('pathItemsList');
+    pathItemsList.innerHTML = '';
+    
+    if (navigation.items.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+            <td colspan="3" class="text-center text-muted py-4">
+                <i class="bi bi-folder2"></i>
+                <br>Pasta vazia
+            </td>
+        `;
+        pathItemsList.appendChild(emptyRow);
+        return;
+    }
+    
+    navigation.items.forEach(item => {
+        const row = document.createElement('tr');
+        
+        const nameCell = document.createElement('td');
+        const nameLink = document.createElement('a');
+        nameLink.href = '#';
+        nameLink.className = 'text-decoration-none';
+        nameLink.innerHTML = `<i class="bi bi-${item.isDirectory ? 'folder2' : 'file-earmark'}"></i> ${item.name}`;
+        
+        if (item.isDirectory) {
+            nameLink.onclick = () => navigateToPathSelector(item.path);
+        }
+        
+        nameCell.appendChild(nameLink);
+        
+        const typeCell = document.createElement('td');
+        typeCell.textContent = item.isDirectory ? 'Pasta' : 'Arquivo';
+        
+        const actionCell = document.createElement('td');
+        if (item.isDirectory) {
+            const selectBtn = document.createElement('button');
+            selectBtn.className = 'btn btn-sm btn-primary';
+            selectBtn.innerHTML = '<i class="bi bi-check"></i> Selecionar';
+            selectBtn.onclick = () => selectPath(item.path);
+            actionCell.appendChild(selectBtn);
+        }
+        
+        row.appendChild(nameCell);
+        row.appendChild(typeCell);
+        row.appendChild(actionCell);
+        pathItemsList.appendChild(row);
+    });
+}
+
+// Atualizar breadcrumb do seletor
+function updatePathBreadcrumb(currentPath) {
+    const breadcrumb = document.getElementById('pathBreadcrumb');
+    breadcrumb.innerHTML = '<li class="breadcrumb-item"><a href="#" onclick="navigateToPathSelector(\'/mnt\')"><i class="bi bi-hdd"></i> Discos</a></li>';
+    
+    if (currentPath === '/mnt') return;
+    
+    const parts = currentPath.split('/').filter(part => part);
+    let currentFullPath = '';
+    
+    parts.forEach((part, index) => {
+        currentFullPath += (index === 0 ? '' : '/') + part;
+        const isLast = index === parts.length - 1;
+        
+        const breadcrumbItem = document.createElement('li');
+        breadcrumbItem.className = `breadcrumb-item ${isLast ? 'active' : ''}`;
+        
+        if (isLast) {
+            breadcrumbItem.textContent = part;
+        } else {
+            const link = document.createElement('a');
+            link.href = '#';
+            link.textContent = part;
+            link.onclick = () => navigateToPathSelector(currentFullPath);
+            breadcrumbItem.appendChild(link);
+        }
+        
+        breadcrumb.appendChild(breadcrumbItem);
+    });
+}
+
+// Selecionar pasta
+function selectPath(path) {
+    selectedDownloadPath = path;
+    document.getElementById('selectedPathDisplay').textContent = path;
+}
+
+// Confirmar seleção de pasta
+function confirmPathSelection() {
+    if (selectedDownloadPath) {
+        document.getElementById('downloadPath').value = selectedDownloadPath;
+        bootstrap.Modal.getInstance(document.getElementById('pathSelectorModal')).hide();
+    } else {
+        alert('Por favor, selecione uma pasta primeiro.');
+    }
+}
+
+// Função utilitária para cores dos discos
+function getDiskTypeColor(type) {
+    const colors = {
+        'mnt': 'primary',
+        'media': 'success'
+    };
+    return colors[type] || 'secondary';
+}
+</script>

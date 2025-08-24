@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  youtube-dl-webui:
+    build: .
+    container_name: youtube-dl-webui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./downloads:/app/downloads
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    environment:
+      - NODE_ENV=production
+      - SECURITY_ENABLED=true
+      - SESSION_SECRET=${SESSION_SECRET:-your-secret-key-change-in-production}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-63a9f0ea7bb98050796b649e85481845}
+      - YTDLP_BIN=/usr/local/bin/yt-dlp
+      - OUTPUT_FOLDER=/app/downloads
+      - LOG_FOLDER=/app/logs
+      - MAX_DOWNLOADS=3
+      - DOWNLOAD_TIMEOUT=3600
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/download', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - youtube-dl-network
+
+  # Serviço opcional para monitoramento com Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: youtube-dl-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - youtube-dl-network
+    profiles:
+      - monitoring
+
+  # Serviço opcional para visualização de métricas com Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: youtube-dl-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - youtube-dl-network
+    profiles:
+      - monitoring
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  youtube-dl-network:
+    driver: bridge
