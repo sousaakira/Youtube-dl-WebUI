@@ -15,33 +15,41 @@ class FileSystemService {
     try {
       console.log('Iniciando busca por discos disponíveis...');
       
-      // Verificar /mnt - apenas diretórios específicos
+      // Verificar /mnt - todos os diretórios são permitidos
       if (await fs.pathExists('/mnt')) {
         console.log('Verificando /mnt...');
         const mntContents = await fs.readdir('/mnt');
         console.log('Conteúdo de /mnt:', mntContents);
         
-        // Lista de diretórios permitidos em /mnt
-        const allowedMntDirs = ['sda1', 'pendrive', 'nfs', 'img', 'n8n'];
-        
         for (const item of mntContents) {
           try {
-            // Só processar diretórios permitidos
-            if (!allowedMntDirs.includes(item)) {
-              console.log('Pulando diretório não permitido /mnt:', item);
-              continue;
-            }
-            
             const fullPath = path.join('/mnt', item);
             const stats = await fs.stat(fullPath);
             if (stats.isDirectory()) {
               console.log('Adicionando disco /mnt:', item);
+              
+              // Obter informações de tamanho e espaço livre de forma segura
+              let diskSize = 0;
+              let freeSpace = 0;
+              
+              try {
+                diskSize = await this.getDirectorySize(fullPath);
+              } catch (sizeError) {
+                console.log('Não foi possível obter tamanho para', fullPath, ':', sizeError.message);
+              }
+              
+              try {
+                freeSpace = await this.getFreeSpace(fullPath);
+              } catch (spaceError) {
+                console.log('Não foi possível obter espaço livre para', fullPath, ':', spaceError.message);
+              }
+              
               disks.push({
                 name: item,
                 path: fullPath,
                 type: 'mnt',
-                size: await this.getDirectorySize(fullPath),
-                freeSpace: await this.getFreeSpace(fullPath),
+                size: diskSize,
+                freeSpace: freeSpace,
                 mounted: true
               });
             }
@@ -54,33 +62,41 @@ class FileSystemService {
         console.log('/mnt não existe');
       }
 
-      // Verificar /media - apenas diretórios de usuário
+      // Verificar /media - todos os diretórios são permitidos
       if (await fs.pathExists('/media')) {
         console.log('Verificando /media...');
         const mediaContents = await fs.readdir('/media');
         console.log('Conteúdo de /media:', mediaContents);
         
-        // Lista de diretórios permitidos em /media (apenas usuários)
-        const allowedMediaDirs = ['akira', 'root'];
-        
         for (const item of mediaContents) {
           try {
-            // Só processar diretórios de usuário permitidos
-            if (!allowedMediaDirs.includes(item)) {
-              console.log('Pulando diretório não permitido /media:', item);
-              continue;
-            }
-            
             const fullPath = path.join('/media', item);
             const stats = await fs.stat(fullPath);
             if (stats.isDirectory()) {
               console.log('Adicionando disco /media:', item);
+              
+              // Obter informações de tamanho e espaço livre de forma segura
+              let diskSize = 0;
+              let freeSpace = 0;
+              
+              try {
+                diskSize = await this.getDirectorySize(fullPath);
+              } catch (sizeError) {
+                console.log('Não foi possível obter tamanho para', fullPath, ':', sizeError.message);
+              }
+              
+              try {
+                freeSpace = await this.getFreeSpace(fullPath);
+              } catch (spaceError) {
+                console.log('Não foi possível obter espaço livre para', fullPath, ':', spaceError.message);
+              }
+              
               disks.push({
                 name: item,
                 path: fullPath,
                 type: 'media',
-                size: await this.getDirectorySize(fullPath),
-                freeSpace: await this.getFreeSpace(fullPath),
+                size: diskSize,
+                freeSpace: freeSpace,
                 mounted: true
               });
             }
@@ -139,23 +155,42 @@ class FileSystemService {
         try {
           const itemStats = await fs.stat(fullPath);
           
+          // Obter tamanho apenas se for um diretório e tivermos permissão
+          let itemSize = 0;
+          let sizeFormatted = '0 B';
+          
+          if (itemStats.isDirectory()) {
+            try {
+              itemSize = await this.getDirectorySize(fullPath);
+              sizeFormatted = this.formatBytes(itemSize);
+            } catch (sizeError) {
+              // Se não conseguir obter o tamanho, usar 0
+              itemSize = 0;
+              sizeFormatted = '0 B';
+            }
+          } else {
+            itemSize = itemStats.size;
+            sizeFormatted = this.formatBytes(itemStats.size);
+          }
+          
           items.push({
             name: item,
             path: fullPath,
             isDirectory: itemStats.isDirectory(),
             isFile: itemStats.isFile(),
             isSymbolicLink: itemStats.isSymbolicLink(),
-            size: itemStats.isDirectory() ? await this.getDirectorySize(fullPath) : itemStats.size,
-            sizeFormatted: itemStats.isDirectory() ? 
-              await this.getDirectorySize(fullPath) : 
-              this.formatBytes(itemStats.size),
+            size: itemSize,
+            sizeFormatted: sizeFormatted,
             modified: itemStats.mtime,
             permissions: itemStats.mode.toString(8),
             owner: itemStats.uid,
             group: itemStats.gid
           });
         } catch (itemError) {
-          console.log('Erro ao processar item', item, 'em', dirPath, ':', itemError.message);
+          // Log apenas erros relevantes
+          if (itemError.code !== 'EACCES' && itemError.code !== 'ENOENT') {
+            console.log('Erro ao processar item', item, 'em', dirPath, ':', itemError.message);
+          }
           continue;
         }
       }
@@ -243,6 +278,12 @@ class FileSystemService {
   async getDirectorySize(dirPath) {
     try {
       let totalSize = 0;
+      
+      // Verificar se o diretório existe e é acessível
+      if (!await fs.pathExists(dirPath)) {
+        return 0;
+      }
+      
       const items = await fs.readdir(dirPath);
       
       // Limitar profundidade para evitar loops infinitos
@@ -271,6 +312,12 @@ class FileSystemService {
           }
           
           const fullPath = path.join(dirPath, item);
+          
+          // Verificar se o item está dentro dos diretórios permitidos
+          if (!this.isPathAllowed(fullPath) && fullPath !== '/mnt' && fullPath !== '/media') {
+            continue;
+          }
+          
           const stats = await fs.stat(fullPath);
           
           if (stats.isDirectory()) {
@@ -280,7 +327,7 @@ class FileSystemService {
           }
         } catch (itemError) {
           // Log apenas erros de permissão, não de arquivos inexistentes
-          if (itemError.code !== 'ENOENT') {
+          if (itemError.code !== 'ENOENT' && itemError.code !== 'EACCES') {
             console.log('Erro ao processar item', item, 'em', dirPath, ':', itemError.message);
           }
           continue;
@@ -289,7 +336,10 @@ class FileSystemService {
       
       return totalSize;
     } catch (error) {
-      console.log('Erro ao obter tamanho da pasta', dirPath, ':', error.message);
+      // Log apenas erros relevantes
+      if (error.code !== 'EACCES' && error.code !== 'ENOENT') {
+        console.log('Erro ao obter tamanho da pasta', dirPath, ':', error.message);
+      }
       return 0;
     }
   }
@@ -297,8 +347,13 @@ class FileSystemService {
   // Obter espaço livre
   async getFreeSpace(dirPath) {
     try {
+      // Verificar se o diretório existe e é acessível
+      if (!await fs.pathExists(dirPath)) {
+        return 0;
+      }
+      
       // Usar fs.statfs se disponível, senão retornar 0
-      if (fs.statfs) {
+      if (typeof fs.statfs === 'function') {
         const stats = await fs.statfs(dirPath);
         return stats.bavail * stats.bsize;
       } else {
@@ -306,7 +361,10 @@ class FileSystemService {
         return 0;
       }
     } catch (error) {
-      console.log('Erro ao obter espaço livre para', dirPath, ':', error.message);
+      // Log apenas erros relevantes
+      if (error.code !== 'EACCES' && error.code !== 'ENOENT') {
+        console.log('Erro ao obter espaço livre para', dirPath, ':', error.message);
+      }
       return 0;
     }
   }
@@ -348,7 +406,9 @@ class FileSystemService {
   // Verificar se o caminho é permitido
   isPathAllowed(dirPath) {
     // Permitir apenas caminhos que começam com /mnt ou /media
-    return dirPath.startsWith('/mnt/') || dirPath.startsWith('/media/');
+    // Incluir também os diretórios raiz /mnt e /media
+    return dirPath.startsWith('/mnt/') || dirPath.startsWith('/media/') || 
+           dirPath === '/mnt' || dirPath === '/media';
   }
 
   // Obter caminho pai de forma segura
